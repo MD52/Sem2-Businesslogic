@@ -1,0 +1,56 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "BuckingMachine.Infrastructure/1.0.0": {
+        "dependencies": {
+          "BuckingMachine.Application": "1.0.0",
+          "BuckingMachine.Domain": "1.0.0"
+        },
+        "runtime": {
+          "BuckingMachine.Infrastructure.dll": {}
+        }
+      },
+      "BuckingMachine.Application/1.0.0": {
+        "dependencies": {
+          "BuckingMachine.Domain": "1.0.0"
+        },
+        "runtime": {
+          "BuckingMachine.Application.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "BuckingMachine.Domain/1.0.0": {
+        "runtime": {
+          "BuckingMachine.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "BuckingMachine.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BuckingMachine.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BuckingMachine.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
