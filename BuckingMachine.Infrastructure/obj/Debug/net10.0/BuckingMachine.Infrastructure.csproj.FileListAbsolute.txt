@@ -15,3 +15,4 @@ D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\Bu
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Infrastructure\obj\Debug\net10.0\refint\BuckingMachine.Infrastructure.dll
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Infrastructure\obj\Debug\net10.0\BuckingMachine.Infrastructure.pdb
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Infrastructure\obj\Debug\net10.0\ref\BuckingMachine.Infrastructure.dll
+D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Infrastructure\obj\Debug\net10.0\BuckingMachine.Infrastructure.sourcelink.json

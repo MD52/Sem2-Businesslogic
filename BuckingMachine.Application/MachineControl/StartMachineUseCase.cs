@@ -17,12 +17,13 @@ public sealed class StartMachineUseCase
     }
 
 
+
+
     public async Task ExecuteAsync(
         CancellationToken cancellationToken = default)
     {
         var machineState =
             await _machineStatusGateway.ReadStatusAsync(cancellationToken);
-
         ValidateMachineCanStart(machineState);
 
         await _machineCommandGateway.SendStartCommandAsync(

@@ -10,7 +10,7 @@
         "projectUniqueName": "D:\\OneDriveABB_TS\\OneDrive - ABB Technikerschule\\NDS\\Semesterarbeit2\\Software\\BusinessLogic_V1\\BuckingMachine.Application\\BuckingMachine.Application.csproj",
         "projectName": "BuckingMachine.Application",
         "projectPath": "D:\\OneDriveABB_TS\\OneDrive - ABB Technikerschule\\NDS\\Semesterarbeit2\\Software\\BusinessLogic_V1\\BuckingMachine.Application\\BuckingMachine.Application.csproj",
-        "packagesPath": "C:\\Users\\d.meyer\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\CodexSandboxOffline\\.nuget\\packages\\",
         "outputPath": "D:\\OneDriveABB_TS\\OneDrive - ABB Technikerschule\\NDS\\Semesterarbeit2\\Software\\BusinessLogic_V1\\BuckingMachine.Application\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
@@ -349,7 +349,7 @@
         "projectUniqueName": "D:\\OneDriveABB_TS\\OneDrive - ABB Technikerschule\\NDS\\Semesterarbeit2\\Software\\BusinessLogic_V1\\BuckingMachine.Domain\\BuckingMachine.Domain.csproj",
         "projectName": "BuckingMachine.Domain",
         "projectPath": "D:\\OneDriveABB_TS\\OneDrive - ABB Technikerschule\\NDS\\Semesterarbeit2\\Software\\BusinessLogic_V1\\BuckingMachine.Domain\\BuckingMachine.Domain.csproj",
-        "packagesPath": "C:\\Users\\d.meyer\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\CodexSandboxOffline\\.nuget\\packages\\",
         "outputPath": "D:\\OneDriveABB_TS\\OneDrive - ABB Technikerschule\\NDS\\Semesterarbeit2\\Software\\BusinessLogic_V1\\BuckingMachine.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [

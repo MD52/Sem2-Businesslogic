@@ -27,7 +27,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\d.meyer\\.nuget\\packages\\": {}
+    "C:\\Users\\CodexSandboxOffline\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
@@ -35,7 +35,7 @@
       "projectUniqueName": "D:\\OneDriveABB_TS\\OneDrive - ABB Technikerschule\\NDS\\Semesterarbeit2\\Software\\BusinessLogic_V1\\BuckingMachine.Application\\BuckingMachine.Application.csproj",
       "projectName": "BuckingMachine.Application",
       "projectPath": "D:\\OneDriveABB_TS\\OneDrive - ABB Technikerschule\\NDS\\Semesterarbeit2\\Software\\BusinessLogic_V1\\BuckingMachine.Application\\BuckingMachine.Application.csproj",
-      "packagesPath": "C:\\Users\\d.meyer\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\CodexSandboxOffline\\.nuget\\packages\\",
       "outputPath": "D:\\OneDriveABB_TS\\OneDrive - ABB Technikerschule\\NDS\\Semesterarbeit2\\Software\\BusinessLogic_V1\\BuckingMachine.Application\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [

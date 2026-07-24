@@ -5,15 +5,24 @@ using BuckingMachine.Domain.Entities;
 
 public sealed class ProcessDataRepository : IProcessDataRepository
 {
-    public Task AddAsync(
+    public Task SaveProcessDataAsync(
         ProcessData processData,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public Task<IReadOnlyCollection<ProcessData>> GetByMachineIdAsync(
+    public Task<MachineCycle> GetCycleDataAsync(
         Guid machineId,
+        int cycleId,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IReadOnlyCollection<ProcessData>> GetProcessDataAsync(
+        Guid machineId,
+        int cycleId,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
@@ -21,6 +30,9 @@ public sealed class ProcessDataRepository : IProcessDataRepository
 
     public Task<IReadOnlyCollection<MachineCycle>> GetCycleHistoryAsync(
         Guid machineId,
+        DateTime? from,
+        DateTime? to,
+        int? limit,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();

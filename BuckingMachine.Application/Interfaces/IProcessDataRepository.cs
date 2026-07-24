@@ -4,13 +4,25 @@ using BuckingMachine.Domain.Entities;
 
 public interface IProcessDataRepository
 {
-    Task AddAsync(ProcessData processData, CancellationToken cancellationToken = default);
+    Task SaveProcessDataAsync(
+        ProcessData processData,
+        CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<ProcessData>> GetByMachineIdAsync(
+    Task<MachineCycle> GetCycleDataAsync(
         Guid machineId,
+        int cycleId,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<ProcessData>> GetProcessDataAsync(
+        Guid machineId,
+        int cycleId,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<MachineCycle>> GetCycleHistoryAsync(
         Guid machineId,
+        DateTime? from,
+        DateTime? to,
+        int? limit,
         CancellationToken cancellationToken = default);
 }
+

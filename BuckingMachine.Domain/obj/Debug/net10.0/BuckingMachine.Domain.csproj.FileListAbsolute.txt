@@ -9,3 +9,4 @@ D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\Bu
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Domain\obj\Debug\net10.0\refint\BuckingMachine.Domain.dll
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Domain\obj\Debug\net10.0\BuckingMachine.Domain.pdb
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Domain\obj\Debug\net10.0\ref\BuckingMachine.Domain.dll
+D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Domain\obj\Debug\net10.0\BuckingMachine.Domain.sourcelink.json

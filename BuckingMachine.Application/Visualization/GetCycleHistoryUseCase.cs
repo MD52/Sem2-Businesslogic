@@ -1,34 +1,85 @@
 namespace BuckingMachine.Application.Visualization;
 
+using BuckingMachine.Application.DTOs;
 using BuckingMachine.Application.Interfaces;
+using BuckingMachine.Domain.Entities;
 
-public sealed class GetCycleHistoryUseCase
+public sealed class GetCycleDataUseCase
 {
     private readonly IProcessDataRepository _processDataRepository;
 
-    public GetCycleHistoryUseCase(IProcessDataRepository processDataRepository)
+    public GetCycleDataUseCase(
+        IProcessDataRepository processDataRepository)
     {
         _processDataRepository = processDataRepository;
     }
 
-    public async Task<IReadOnlyCollection<DTOs.MachineCycleDto>> ExecuteAsync(
+    public async Task<MachineCycleDto> ExecuteAsync(
         Guid machineId,
+        int cycleId,
         CancellationToken cancellationToken = default)
     {
-        var cycles = await LoadCycleHistoryAsync(machineId, cancellationToken);
-        return MapToDtos(cycles);
+        MachineCycle cycle = await LoadCycleAsync(
+            machineId,
+            cycleId,
+            cancellationToken);
+
+        IReadOnlyCollection<ProcessData> processData =
+            await LoadProcessDataAsync(
+                machineId,
+                cycleId,
+                cancellationToken);
+
+        return MapToDto(cycle, processData);
     }
 
-    private Task<IReadOnlyCollection<Domain.Entities.MachineCycle>> LoadCycleHistoryAsync(
+    private Task<MachineCycle> LoadCycleAsync(
         Guid machineId,
+        int cycleId,
         CancellationToken cancellationToken)
     {
-        return _processDataRepository.GetCycleHistoryAsync(machineId, cancellationToken);
+        return _processDataRepository.GetCycleDataAsync(
+            machineId,
+            cycleId,
+            cancellationToken);
     }
 
-    private static IReadOnlyCollection<DTOs.MachineCycleDto> MapToDtos(
-        IReadOnlyCollection<Domain.Entities.MachineCycle> cycles)
+    private Task<IReadOnlyCollection<ProcessData>> LoadProcessDataAsync(
+        Guid machineId,
+        int cycleId,
+        CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return _processDataRepository.GetProcessDataAsync(
+            machineId,
+            cycleId,
+            cancellationToken);
+    }
+
+    private static MachineCycleDto MapToDto(
+        MachineCycle cycle,
+        IReadOnlyCollection<ProcessData> processData)
+    {
+        return new MachineCycleDto
+        {
+            CycleId = cycle.CycleId,
+            Name = cycle.Name,
+            MotionState = cycle.MotionState,
+
+            ProcessData = processData
+                .Select(data => new ProcessDataDto
+                {
+                    ProcessDataId = data.ProcessDataId,
+                    CycleId = data.CycleId,
+                    Timestamp = data.Timestamp,
+                    VelocitySideDrives = data.VelocitySideDrives,
+                    TorqueSideDrives = data.TorqueSideDrives,
+                    ActualPosSideDrives = data.ActualPosSideDrives,
+                    VelocityMainDrives = data.VelocityMainDrives,
+                    TorqueMainDrives = data.TorqueMainDrives,
+                    ActualPosMainDrives = data.ActualPosMainDrives,
+                    MotionState = data.MotionState
+                })
+                .ToList()
+        };
     }
 }

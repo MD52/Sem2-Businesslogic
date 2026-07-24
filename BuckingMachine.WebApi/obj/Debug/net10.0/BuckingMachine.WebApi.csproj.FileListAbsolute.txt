@@ -32,3 +32,4 @@ D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\Bu
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.WebApi\obj\Debug\net10.0\BuckingMachine.WebApi.pdb
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.WebApi\obj\Debug\net10.0\BuckingMachine.WebApi.genruntimeconfig.cache
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.WebApi\obj\Debug\net10.0\ref\BuckingMachine.WebApi.dll
+D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.WebApi\obj\Debug\net10.0\BuckingMachine.WebApi.sourcelink.json

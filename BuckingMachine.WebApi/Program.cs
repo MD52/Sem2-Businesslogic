@@ -30,7 +30,7 @@ builder.Services.AddScoped<ReadMachineStatusUseCase>();
 builder.Services.AddScoped<RecordProcessDataUseCase>();
 
 // Visualization
-builder.Services.AddScoped<GetProcessDataUseCase>();
+builder.Services.AddScoped<GetCycleDataUseCase>();
 builder.Services.AddScoped<GetCycleHistoryUseCase>();
 
 var app = builder.Build();

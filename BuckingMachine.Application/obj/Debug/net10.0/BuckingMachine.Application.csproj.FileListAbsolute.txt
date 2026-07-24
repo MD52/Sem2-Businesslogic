@@ -13,3 +13,4 @@ D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\Bu
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Application\obj\Debug\net10.0\refint\BuckingMachine.Application.dll
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Application\obj\Debug\net10.0\BuckingMachine.Application.pdb
 D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Application\obj\Debug\net10.0\ref\BuckingMachine.Application.dll
+D:\OneDriveABB_TS\OneDrive - ABB Technikerschule\NDS\Semesterarbeit2\Software\BusinessLogic_V1\BuckingMachine.Application\obj\Debug\net10.0\BuckingMachine.Application.sourcelink.json
