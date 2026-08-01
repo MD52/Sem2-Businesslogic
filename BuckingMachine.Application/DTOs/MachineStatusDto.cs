@@ -4,5 +4,5 @@ using BuckingMachine.Domain.Enums;
 
 public sealed class MachineStatusDto
 {
-    public MotionStates MotionState { get; init; }
+    public MotionState MotionState { get; init; }
 }

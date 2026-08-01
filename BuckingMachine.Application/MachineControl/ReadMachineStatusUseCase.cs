@@ -24,14 +24,14 @@ public sealed class ReadMachineStatusUseCase
         return MapToDto(motionState);
     }
 
-    private async Task<MotionStates> LoadMachineStatusAsync(
+    private async Task<MotionState> LoadMachineStatusAsync(
         CancellationToken cancellationToken)
     {
         return await _machineStatusGateway.ReadStatusAsync(cancellationToken);
     }
 
     private static MachineStatusDto MapToDto(
-        MotionStates motionState)
+        MotionState motionState)
     {
         return new MachineStatusDto
         {

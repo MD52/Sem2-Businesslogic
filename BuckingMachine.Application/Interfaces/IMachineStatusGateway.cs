@@ -4,5 +4,5 @@ using BuckingMachine.Domain.Enums;
 
 public interface IMachineStatusGateway
 {
-    Task<MotionStates> ReadStatusAsync(CancellationToken cancellationToken = default);
+    Task<MotionState> ReadStatusAsync(CancellationToken cancellationToken = default);
 }

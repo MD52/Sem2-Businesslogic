@@ -4,85 +4,30 @@ using BuckingMachine.Application.DTOs;
 using BuckingMachine.Application.Interfaces;
 using BuckingMachine.Domain.Entities;
 
-public sealed class GetCycleHistoryUseCase
+public sealed class GetCycleDataUseCase
 {
-    private readonly IProcessDataRepository _processDataRepository;
+    private readonly IProcessDataRepository _repository;
+    public GetCycleDataUseCase(IProcessDataRepository repository) => _repository = repository;
 
-    public GetCycleHistoryUseCase(
-        IProcessDataRepository processDataRepository)
+    public async Task<MachineCycleDto> ExecuteAsync(int cycleId, CancellationToken cancellationToken = default)
     {
-        _processDataRepository = processDataRepository;
+        MachineCycle cycle = await LoadCycleAsync(cycleId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Zyklus {cycleId} wurde nicht gefunden.");
+        ParameterData parameters = await LoadParameterDataAsync(cycle.ParameterDataId, cancellationToken)
+            ?? throw new InvalidOperationException("Der Parametersatz des Zyklus wurde nicht gefunden.");
+        StatusData status = await LoadStatusDataAsync(cycle.StatusDataId, cancellationToken)
+            ?? throw new InvalidOperationException("Der Statusdatensatz des Zyklus wurde nicht gefunden.");
+        return MapToDto(cycle, parameters, status);
     }
 
-    public async Task<IReadOnlyCollection<MachineCycleDto>> ExecuteAsync(
-        Guid machineId,
-        DateTime? from,
-        DateTime? to,
-        int? limit,
-        CancellationToken cancellationToken = default)
+    private Task<MachineCycle?> LoadCycleAsync(int id, CancellationToken token) => _repository.GetMachineCycleAsync(id, token);
+    private Task<ParameterData?> LoadParameterDataAsync(int id, CancellationToken token) => _repository.GetParameterDataAsync(id, token);
+    private Task<StatusData?> LoadStatusDataAsync(int id, CancellationToken token) => _repository.GetStatusDataAsync(id, token);
+
+    private static MachineCycleDto MapToDto(MachineCycle c, ParameterData p, StatusData s) => new()
     {
-        ValidateFilter(from, to, limit);
-
-        IReadOnlyCollection<MachineCycle> cycles =
-            await LoadCycleHistoryAsync(
-                machineId,
-                from,
-                to,
-                limit,
-                cancellationToken);
-
-        return MapToDtos(cycles);
-    }
-
-    private static void ValidateFilter(
-        DateTime? from,
-        DateTime? to,
-        int? limit)
-    {
-        if (from.HasValue &&
-            to.HasValue &&
-            from.Value > to.Value)
-        {
-            throw new ArgumentException(
-                "Das Startdatum darf nicht nach dem Enddatum liegen.");
-        }
-
-        if (limit.HasValue && limit.Value <= 0)
-        {
-            throw new ArgumentException(
-                "Das Limit muss grösser als 0 sein.");
-        }
-    }
-
-    private Task<IReadOnlyCollection<MachineCycle>>
-        LoadCycleHistoryAsync(
-            Guid machineId,
-            DateTime? from,
-            DateTime? to,
-            int? limit,
-            CancellationToken cancellationToken)
-    {
-        return _processDataRepository.GetCycleHistoryAsync(
-            machineId,
-            from,
-            to,
-            limit,
-            cancellationToken);
-    }
-
-    private static IReadOnlyCollection<MachineCycleDto> MapToDtos(
-        IReadOnlyCollection<MachineCycle> cycles)
-    {
-        return cycles
-            .Select(cycle => new MachineCycleDto
-            {
-                CycleId = cycle.CycleId,
-                Name = cycle.Name,
-                MotionState = cycle.MotionState,
-                StartTime = cycle.StartTime,
-                EndTime = cycle.EndTime,
-                Duration = cycle.Duration
-            })
-            .ToList();
-    }
+        CycleId = c.CycleId, MachineId = c.MachineId, ParameterDataId = c.ParameterDataId,
+        StatusDataId = c.StatusDataId, Name = c.Name, StartTime = c.StartTime, EndTime = c.EndTime, Duration = c.Duration,
+        ParameterData = DtoMapper.Map(p), StatusData = DtoMapper.Map(s)
+    };
 }

@@ -4,82 +4,29 @@ using BuckingMachine.Application.DTOs;
 using BuckingMachine.Application.Interfaces;
 using BuckingMachine.Domain.Entities;
 
-public sealed class GetCycleDataUseCase
+public sealed class GetCycleHistoryUseCase
 {
-    private readonly IProcessDataRepository _processDataRepository;
+    private readonly IProcessDataRepository _repository;
+    public GetCycleHistoryUseCase(IProcessDataRepository repository) => _repository = repository;
 
-    public GetCycleDataUseCase(
-        IProcessDataRepository processDataRepository)
+    public async Task<IReadOnlyCollection<MachineCycleDto>> ExecuteAsync(DateTime? from = null, DateTime? to = null, int? limit = null, CancellationToken cancellationToken = default)
     {
-        _processDataRepository = processDataRepository;
+        ValidateFilter(from, to, limit);
+        return MapToDtos(await LoadCycleHistoryAsync(from, to, limit, cancellationToken));
     }
 
-    public async Task<MachineCycleDto> ExecuteAsync(
-        Guid machineId,
-        int cycleId,
-        CancellationToken cancellationToken = default)
+    private static void ValidateFilter(DateTime? from, DateTime? to, int? limit)
     {
-        MachineCycle cycle = await LoadCycleAsync(
-            machineId,
-            cycleId,
-            cancellationToken);
-
-        IReadOnlyCollection<ProcessData> processData =
-            await LoadProcessDataAsync(
-                machineId,
-                cycleId,
-                cancellationToken);
-
-        return MapToDto(cycle, processData);
+        if (from > to) throw new ArgumentException("Das Startdatum darf nicht nach dem Enddatum liegen.");
+        if (limit <= 0) throw new ArgumentException("Das Limit muss grösser als 0 sein.", nameof(limit));
     }
 
-    private Task<MachineCycle> LoadCycleAsync(
-        Guid machineId,
-        int cycleId,
-        CancellationToken cancellationToken)
-    {
-        return _processDataRepository.GetCycleDataAsync(
-            machineId,
-            cycleId,
-            cancellationToken);
-    }
+    private Task<IReadOnlyCollection<MachineCycle>> LoadCycleHistoryAsync(DateTime? from, DateTime? to, int? limit, CancellationToken token) =>
+        _repository.GetCycleHistoryAsync(from, to, limit, token);
 
-    private Task<IReadOnlyCollection<ProcessData>> LoadProcessDataAsync(
-        Guid machineId,
-        int cycleId,
-        CancellationToken cancellationToken)
+    private static IReadOnlyCollection<MachineCycleDto> MapToDtos(IEnumerable<MachineCycle> cycles) => cycles.Select(c => new MachineCycleDto
     {
-        return _processDataRepository.GetProcessDataAsync(
-            machineId,
-            cycleId,
-            cancellationToken);
-    }
-
-    private static MachineCycleDto MapToDto(
-        MachineCycle cycle,
-        IReadOnlyCollection<ProcessData> processData)
-    {
-        return new MachineCycleDto
-        {
-            CycleId = cycle.CycleId,
-            Name = cycle.Name,
-            MotionState = cycle.MotionState,
-
-            ProcessData = processData
-                .Select(data => new ProcessDataDto
-                {
-                    ProcessDataId = data.ProcessDataId,
-                    CycleId = data.CycleId,
-                    Timestamp = data.Timestamp,
-                    VelocitySideDrives = data.VelocitySideDrives,
-                    TorqueSideDrives = data.TorqueSideDrives,
-                    ActualPosSideDrives = data.ActualPosSideDrives,
-                    VelocityMainDrives = data.VelocityMainDrives,
-                    TorqueMainDrives = data.TorqueMainDrives,
-                    ActualPosMainDrives = data.ActualPosMainDrives,
-                    MotionState = data.MotionState
-                })
-                .ToList()
-        };
-    }
+        CycleId = c.CycleId, MachineId = c.MachineId, ParameterDataId = c.ParameterDataId,
+        StatusDataId = c.StatusDataId, Name = c.Name, StartTime = c.StartTime, EndTime = c.EndTime, Duration = c.Duration
+    }).ToArray();
 }

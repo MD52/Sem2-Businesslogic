@@ -33,9 +33,9 @@ public sealed class StartMachineUseCase
 
 
     private static void ValidateMachineCanStart(
-        MotionStates motionState)
+        MotionState motionState)
     {
-        if (motionState != MotionStates.Idle)
+        if (motionState != MotionState.Idle)
         {
             throw new InvalidOperationException(
                 "Die Maschine ist nicht startbereit.");

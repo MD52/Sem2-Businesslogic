@@ -23,9 +23,9 @@ public sealed class StopMachineUseCase
         await _machineCommandGateway.SendStopCommandAsync(cancellationToken);
     }
 
-    private static void ValidateMachineCanStop(MotionStates motionState)
+    private static void ValidateMachineCanStop(MotionState motionState)
     {
-        if (motionState == MotionStates.Idle)
+        if (motionState == MotionState.Idle)
         {
             throw new InvalidOperationException("Die Maschine ist bereits gestoppt.");
         }
