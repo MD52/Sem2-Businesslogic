@@ -30,5 +30,5 @@ public enum DriveOperationMode
     /// <summary>
     /// Direkte PWM-/Spannungsregelung ohne Positions- oder Geschwindigkeitsregelung.
     /// </summary>
-    PWMControl = 16
+    PwmControl = 16
 }
