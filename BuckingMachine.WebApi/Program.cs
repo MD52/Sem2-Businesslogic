@@ -6,6 +6,7 @@ using BuckingMachine.Application.Visualization;
 using BuckingMachine.Infrastructure.Authentication;
 using BuckingMachine.Infrastructure.Mqtt;
 using BuckingMachine.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,8 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IMachineCommandGateway, MqttMachineCommandGateway>();
 builder.Services.AddScoped<IMachineStatusGateway, MqttMachineStatusGateway>();
 builder.Services.AddScoped<IProcessDataRepository, ProcessDataRepository>();
+builder.Services.AddDbContext<BuckingMachineDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("BuckingMachine") ?? "Data Source=bucking-machine.db"));
 builder.Services.AddScoped<IAuthenticationService, JwtTokenService>();
 
 // Authentication

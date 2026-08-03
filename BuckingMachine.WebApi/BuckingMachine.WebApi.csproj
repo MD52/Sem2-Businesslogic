@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <ProjectReference Include="..\BuckingMachine.Application\BuckingMachine.Application.csproj" />
     <ProjectReference Include="..\BuckingMachine.Infrastructure\BuckingMachine.Infrastructure.csproj" />
   </ItemGroup>
