@@ -4,51 +4,47 @@ using BuckingMachine.Application.DTOs;
 using BuckingMachine.Application.MachineControl;
 using Microsoft.AspNetCore.Mvc;
 
-
-
 [ApiController]
 [Route("api/machine")]
-
-public class MachineController : ControllerBase
+public sealed class MachineController : ControllerBase
 {
-    private readonly StartMachineUseCase _startMachineUseCase;
-    private readonly StopMachineUseCase _stopMachineUseCase;
-    private readonly ReadMachineStatusUseCase _readMachineStatusUseCase;
+    private readonly MachineControlUseCase _machineControlUseCase;
 
-    public MachineController(
-        StartMachineUseCase startMachineUseCase,
-        StopMachineUseCase stopMachineUseCase,
-        ReadMachineStatusUseCase readMachineStatusUseCase)
+    public MachineController(MachineControlUseCase machineControlUseCase) =>
+        _machineControlUseCase = machineControlUseCase;
+
+    [HttpPost("start-cycle")]
+    public async Task<IActionResult> StartCycleAsync(CancellationToken cancellationToken)
     {
-        _startMachineUseCase = startMachineUseCase;
-        _stopMachineUseCase = stopMachineUseCase;
-        _readMachineStatusUseCase = readMachineStatusUseCase;
+        await _machineControlUseCase.StartCycleAsync(cancellationToken);
+        return NoContent();
     }
 
-
-    [HttpPost("start")]
-    public async Task<IActionResult> StartAsync()
+    [HttpPost("start-continuous")]
+    public async Task<IActionResult> StartContinuousAsync(CancellationToken cancellationToken)
     {
-        await _startMachineUseCase.ExecuteAsync();
-
-        return Ok();
+        await _machineControlUseCase.StartContinuousAsync(cancellationToken);
+        return NoContent();
     }
-
 
     [HttpPost("stop")]
-    public async Task<IActionResult> StopAsync()
+    public async Task<IActionResult> StopAsync(CancellationToken cancellationToken)
     {
-        await _stopMachineUseCase.ExecuteAsync();
+        await _machineControlUseCase.StopAsync(cancellationToken);
+        return NoContent();
+    }
 
-        return Ok();
+    [HttpPost("reset")]
+    public async Task<IActionResult> ResetAsync(CancellationToken cancellationToken)
+    {
+        await _machineControlUseCase.ResetAsync(cancellationToken);
+        return NoContent();
     }
 
     [HttpGet("status")]
-    public async Task<ActionResult<MachineStatusDto>> GetStatusAsync()
+    public async Task<ActionResult<MachineStatusDto>> GetStatusAsync(CancellationToken cancellationToken)
     {
-        MachineStatusDto status =
-            await _readMachineStatusUseCase.ExecuteAsync();
-
+        MachineStatusDto status = await _machineControlUseCase.ReadStateAsync(cancellationToken);
         return Ok(status);
     }
 }
