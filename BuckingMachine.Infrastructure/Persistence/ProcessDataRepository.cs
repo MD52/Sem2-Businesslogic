@@ -1,6 +1,7 @@
 namespace BuckingMachine.Infrastructure.Persistence;
 
 using System.Collections.Concurrent;
+using BuckingMachine.Application.DTOs;
 using BuckingMachine.Application.Interfaces;
 using BuckingMachine.Domain.Entities;
 
@@ -52,14 +53,40 @@ public sealed class ProcessDataRepository : IProcessDataRepository
         return Task.FromResult(id);
     }
 
-    public async Task<int> SaveCompletedCycleAsync(
-        StatusData statusData,
+    public async Task SaveCompletedCycleAsync(
         MachineCycle machineCycle,
+        StatusData statusData,
         CancellationToken cancellationToken = default)
     {
         int statusId = await SaveStatusDataAsync(statusData, cancellationToken);
         var completedCycle = Copy(machineCycle, machineCycle.CycleId, statusId);
-        return await SaveMachineCycleAsync(completedCycle, cancellationToken);
+        await SaveMachineCycleAsync(completedCycle, cancellationToken);
+    }
+
+    public async Task<MachineCycleDto?> GetCycleDataAsync(
+        int cycleId,
+        CancellationToken cancellationToken = default)
+    {
+        MachineCycle? cycle = await GetMachineCycleAsync(cycleId, cancellationToken);
+        if (cycle is null)
+            return null;
+
+        ParameterData? parameters = await GetParameterDataAsync(cycle.ParameterDataId, cancellationToken);
+        StatusData? status = await GetStatusDataAsync(cycle.StatusDataId, cancellationToken);
+
+        return new MachineCycleDto
+        {
+            CycleId = cycle.CycleId,
+            MachineId = cycle.MachineId,
+            ParameterDataId = cycle.ParameterDataId,
+            StatusDataId = cycle.StatusDataId,
+            Name = cycle.Name,
+            StartTime = cycle.StartTime,
+            EndTime = cycle.EndTime,
+            Duration = cycle.Duration,
+            ParameterData = parameters is null ? null : Map(parameters),
+            StatusData = status is null ? null : Map(status)
+        };
     }
 
     public Task<MachineCycle?> GetMachineCycleAsync(int cycleId, CancellationToken cancellationToken = default)
@@ -150,5 +177,25 @@ public sealed class ProcessDataRepository : IProcessDataRepository
         Duration = source.Duration,
         ParameterData = source.ParameterData,
         StatusData = source.StatusData
+    };
+
+    private static ParameterDataDto Map(ParameterData p) => new()
+    {
+        ParameterDataId=p.ParameterDataId, MachineId=p.MachineId, RecordedAt=p.RecordedAt,
+        OperationModeSideDrives=p.OperationModeSideDrives, TargetVelocitySideDrives=p.TargetVelocitySideDrives,
+        TargetTorqueSideDrives=p.TargetTorqueSideDrives, TargetPosSideDrives=p.TargetPosSideDrives,
+        OperationModeMainDrives=p.OperationModeMainDrives, TargetVelocityMainDrives=p.TargetVelocityMainDrives,
+        TargetTorqueMainDrives=p.TargetTorqueMainDrives, TargetPosMainDrives=p.TargetPosMainDrives,
+        BreakTimeHoldPos=p.BreakTimeHoldPos, ReleaseTimeHoldPos=p.ReleaseTimeHoldPos,
+        AmountCycleMovements=p.AmountCycleMovements
+    };
+
+    private static StatusDataDto Map(StatusData s) => new()
+    {
+        StatusDataId=s.StatusDataId, MachineId=s.MachineId, Timestamp=s.Timestamp, MotionState=s.MotionState,
+        OperationModeSideDrives=s.OperationModeSideDrives, ActualVelocitySideDrives=s.ActualVelocitySideDrives,
+        ActualTorqueSideDrives=s.ActualTorqueSideDrives, ActualPosSideDrives=s.ActualPosSideDrives,
+        OperationModeMainDrives=s.OperationModeMainDrives, ActualVelocityMainDrives=s.ActualVelocityMainDrives,
+        ActualTorqueMainDrives=s.ActualTorqueMainDrives, ActualPosMainDrives=s.ActualPosMainDrives
     };
 }

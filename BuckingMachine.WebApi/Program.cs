@@ -17,6 +17,7 @@ builder.Services.AddScoped<IAuthenticationService, JwtTokenService>();
 
 builder.Services.AddScoped<AuthenticateOperatorUseCase>();
 builder.Services.AddScoped<MachineControlUseCase>();
+builder.Services.AddScoped<ReadMachineStatusUseCase>();
 builder.Services.AddScoped<RecordProcessDataUseCase>();
 builder.Services.AddScoped<GetCycleDataUseCase>();
 builder.Services.AddScoped<GetCycleHistoryUseCase>();

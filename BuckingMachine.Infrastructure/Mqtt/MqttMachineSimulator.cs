@@ -5,155 +5,185 @@ using BuckingMachine.Application.MachineControl;
 using BuckingMachine.Domain.Entities;
 using BuckingMachine.Domain.Enums;
 
+/// <summary>
+/// Einfache Simulation der Bucking-Maschine.
+///
+/// Die Klasse simuliert:
+/// - einen einzelnen Zyklus,
+/// - einen kontinuierlichen Betrieb,
+/// - Stop und Reset,
+/// - einen manuell auslösbaren Fault-Zustand,
+/// - die Übernahme der zuletzt eingestellten Parameter,
+/// - das Lesen des aktuellen Zustands.
+///
+/// Die Klasse enthält absichtlich keine umfangreichen Startprüfungen,
+/// damit der Ablauf für die Semesterarbeit möglichst kompakt bleibt.
+/// </summary>
 public sealed class MqttMachineSimulator : IMachineControlGateway, IAsyncDisposable
 {
-    private static readonly TimeSpan CycleDuration = TimeSpan.FromSeconds(5);
-    private static readonly TimeSpan CyclePause = TimeSpan.FromSeconds(2);
+    // Feste Zeiten für die Simulation.
+    private static readonly TimeSpan CycleDuration =
+        TimeSpan.FromSeconds(5);
 
-    private readonly SemaphoreSlim _stateLock = new(1, 1);
+    private static readonly TimeSpan PauseBetweenCycles =
+        TimeSpan.FromSeconds(2);
 
-    private CancellationTokenSource? _runCancellation;
-    private Task? _runTask;
-
+    // Aktueller Zustand der simulierten Maschine.
     private MotionState _motionState = MotionState.Idle;
-    private ParameterData? _currentParameters;
+
+    // Lokaler Zähler für vollständig abgeschlossene Zyklen.
     private int _completedCycles;
 
+    // Zuletzt vom Frontend übernommener Parametersatz.
+    // Dieser Parametersatz wird beim nächsten Zyklus verwendet.
+    private ParameterData? _currentParameters;
+
+    // Wird benötigt, um einen kontinuierlichen Betrieb mit StopAsync()
+    // abbrechen zu können.
+    private CancellationTokenSource? _runCancellation;
+
+    // Referenz auf die aktuell laufende Sequenz.
+    private Task? _runningSequence;
+
+    /// <summary>
+    /// Startet genau einen Zyklus.
+    ///
+    /// Hier wird RunSequenceAsync() direkt aufgerufen.
+    /// false bedeutet: Die Sequenz wird nur einmal ausgeführt.
+    /// </summary>
+    /// 
     public Task StartSingleCycleAsync(
         CancellationToken cancellationToken = default)
     {
-        return StartAsync(false, cancellationToken);
+        _runCancellation?.Dispose();
+
+        _runCancellation =
+            CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken);
+
+        _runningSequence = RunSequenceAsync(
+            runContinuously: false,
+            _runCancellation.Token);
+
+        // Der Startbefehl wird sofort bestätigt.
+        // Die Sequenz läuft währenddessen asynchron weiter.
+        return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Startet den kontinuierlichen Betrieb.
+    ///
+    /// true bedeutet: Nach jedem Zyklus und der festen Pause
+    /// wird erneut ein Zyklus ausgeführt, bis StopAsync() aufgerufen wird.
+    /// </summary>
     public Task StartContinuousAsync(
         CancellationToken cancellationToken = default)
     {
-        return StartAsync(true, cancellationToken);
+        _runCancellation?.Dispose();
+
+        _runCancellation =
+            CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken);
+
+        _runningSequence = RunSequenceAsync(
+            runContinuously: true,
+            _runCancellation.Token);
+
+        return Task.CompletedTask;
     }
 
-    public async Task StopAsync(
-        CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Stoppt die laufende Sequenz und setzt den Zustand auf Idle.
+    /// </summary>
+    public async Task StopAsync()
     {
-        CancellationTokenSource? cancellation;
-        Task? runningTask;
-
-        await _stateLock.WaitAsync(cancellationToken);
-        try
+        if (_runCancellation is not null)
         {
-            cancellation = _runCancellation;
-            runningTask = _runTask;
-            cancellation?.Cancel();
-        }
-        finally
-        {
-            _stateLock.Release();
+            await _runCancellation.CancelAsync();
         }
 
-        if (runningTask is not null)
+        if (_runningSequence is not null)
         {
             try
             {
-                await runningTask.WaitAsync(cancellationToken);
+                await _runningSequence;
             }
             catch (OperationCanceledException)
             {
+                // Der Abbruch durch StopAsync() ist erwartet.
             }
         }
 
-        await SetStateAsync(MotionState.Idle, cancellationToken);
+        _motionState = MotionState.Idle;
     }
 
-    public async Task ResetAsync(
-        CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Stoppt die Simulation, setzt den Zykluszähler auf null
+    /// und setzt den Zustand auf Idle.
+    ///
+    /// Die zuletzt übernommenen Parameter bleiben gespeichert.
+    /// </summary>
+    public async Task ResetAsync()
     {
-        await StopAsync(cancellationToken);
+        await StopAsync();
 
-        await _stateLock.WaitAsync(cancellationToken);
-        try
-        {
-            _completedCycles = 0;
-            _motionState = MotionState.Idle;
-        }
-        finally
-        {
-            _stateLock.Release();
-        }
+        _completedCycles = 0;
+        _motionState = MotionState.Idle;
     }
 
-    public async Task UpdateParametersAsync(
-        ParameterData parameterData,
-        CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Löst für Test- und Präsentationszwecke einen Fault-Zustand aus.
+    /// Eine laufende Sequenz wird vorher gestoppt.
+    /// </summary>
+    public async Task TriggerFaultAsync()
+    {
+        await StopAsync();
+
+        _motionState = MotionState.Faulted;
+    }
+
+    /// <summary>
+    /// Übernimmt den vollständigen Parametersatz aus dem Frontend.
+    ///
+    /// Die persistente Speicherung in MySQL erfolgt nicht hier,
+    /// sondern über den RecordProcessDataUseCase.
+    /// </summary>
+    public Task UpdateParametersAsync(
+        ParameterData parameterData)
     {
         ArgumentNullException.ThrowIfNull(parameterData);
 
-        await _stateLock.WaitAsync(cancellationToken);
-        try
-        {
-            _currentParameters = parameterData;
-        }
-        finally
-        {
-            _stateLock.Release();
-        }
+        _currentParameters = parameterData;
+
+        return Task.CompletedTask;
     }
 
-    public async Task<MachineSimulationStatus> ReadStateAsync(
-        CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Gibt den aktuellen Zustand, den Zykluszähler und die zuletzt
+    /// übernommenen Parameter zurück.
+    /// </summary>
+    public Task<MachineSimulationStatus> ReadStateAsync()
     {
-        await _stateLock.WaitAsync(cancellationToken);
-        try
-        {
-            return new MachineSimulationStatus(
-                _motionState,
-                _completedCycles,
-                _currentParameters);
-        }
-        finally
-        {
-            _stateLock.Release();
-        }
+        var status = new MachineSimulationStatus(
+            MotionState: _motionState,
+            CompletedCycles: _completedCycles,
+            CurrentParameters: _currentParameters);
+
+        return Task.FromResult(status);
     }
 
-    private async Task StartAsync(
-        bool runContinuously,
-        CancellationToken cancellationToken)
-    {
-        await _stateLock.WaitAsync(cancellationToken);
-        try
-        {
-            if (_runTask is { IsCompleted: false })
-            {
-                throw new InvalidOperationException(
-                    "Die Simulation läuft bereits.");
-            }
 
-            if (_motionState == MotionState.Faulted)
-            {
-                throw new InvalidOperationException(
-                    "Die Maschine muss vor dem Start zurückgesetzt werden.");
-            }
 
-            if (_currentParameters is null)
-            {
-                throw new InvalidOperationException(
-                    "Vor dem Start müssen Parameter übernommen werden.");
-            }
 
-            _runCancellation?.Dispose();
-            _runCancellation = new CancellationTokenSource();
-
-            _runTask = RunSequenceAsync(
-                runContinuously,
-                _runCancellation.Token);
-        }
-        finally
-        {
-            _stateLock.Release();
-        }
-
-        await Task.CompletedTask;
-    }
-
+    /// <summary>
+    /// Führt entweder einen einzelnen Zyklus oder mehrere Zyklen aus.
+    ///
+    /// runContinuously = false:
+    ///     genau ein Zyklus
+    ///
+    /// runContinuously = true:
+    ///     Zyklen wiederholen, bis der CancellationToken abgebrochen wird
+    /// </summary>
     private async Task RunSequenceAsync(
         bool runContinuously,
         CancellationToken cancellationToken)
@@ -163,82 +193,63 @@ public sealed class MqttMachineSimulator : IMachineControlGateway, IAsyncDisposa
             do
             {
                 await ExecuteCycleAsync(cancellationToken);
-                await Task.Delay(CyclePause, cancellationToken);
 
-                if (!runContinuously)
+                // Die Pause ist nur für den kontinuierlichen Betrieb nötig.
+                if (runContinuously)
                 {
-                    break;
+                    await Task.Delay(
+                        PauseBetweenCycles,
+                        cancellationToken);
                 }
             }
-            while (!cancellationToken.IsCancellationRequested);
+            while (runContinuously);
 
-            await SetStateAsync(
-                MotionState.Idle,
-                CancellationToken.None);
+            _motionState = MotionState.Idle;
         }
         catch (OperationCanceledException)
         {
-            await SetStateAsync(
-                MotionState.Idle,
-                CancellationToken.None);
+            // StopAsync() bricht Task.Delay() über den CancellationToken ab.
+            _motionState = MotionState.Idle;
         }
         catch
         {
-            await SetStateAsync(
-                MotionState.Faulted,
-                CancellationToken.None);
-
+            // Unerwartete Fehler führen zum Fault-Zustand.
+            _motionState = MotionState.Faulted;
             throw;
         }
     }
 
+    /// <summary>
+    /// Simuliert genau einen Maschinenzyklus.
+    /// </summary>
     private async Task ExecuteCycleAsync(
         CancellationToken cancellationToken)
     {
-        await SetStateAsync(
-            MotionState.Active,
-            cancellationToken);
-
-        // Der simulierte Zyklus läuft immer im PositionControl-Modus.
+        // Für den simulierten Zyklus wird PositionControl verwendet.
         DriveOperationMode cycleMode =
             DriveOperationMode.PositionControl;
 
+        // cycleMode wird in dieser einfachen Simulation nur dokumentiert.
         _ = cycleMode;
 
+        // Start des Zyklus.
+        _motionState = MotionState.Active;
+
+        // Simulierte Bearbeitungszeit.
         await Task.Delay(
             CycleDuration,
             cancellationToken);
 
-        await _stateLock.WaitAsync(cancellationToken);
-        try
-        {
-            _completedCycles++;
-        }
-        finally
-        {
-            _stateLock.Release();
-        }
+        // Der Zyklus wurde vollständig abgeschlossen.
+        _completedCycles++;
 
-        await SetStateAsync(
-            MotionState.Idle,
-            cancellationToken);
+        // Nach einem Zyklus befindet sich die Maschine wieder in Idle.
+        _motionState = MotionState.Idle;
     }
 
-    private async Task SetStateAsync(
-        MotionState state,
-        CancellationToken cancellationToken)
-    {
-        await _stateLock.WaitAsync(cancellationToken);
-        try
-        {
-            _motionState = state;
-        }
-        finally
-        {
-            _stateLock.Release();
-        }
-    }
-
+    /// <summary>
+    /// Gibt beim Beenden der Anwendung verwendete Ressourcen frei.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         if (_runCancellation is not null)
@@ -247,17 +258,16 @@ public sealed class MqttMachineSimulator : IMachineControlGateway, IAsyncDisposa
             _runCancellation.Dispose();
         }
 
-        if (_runTask is not null)
+        if (_runningSequence is not null)
         {
             try
             {
-                await _runTask;
+                await _runningSequence;
             }
             catch (OperationCanceledException)
             {
+                // Erwarteter Abbruch beim Beenden der Anwendung.
             }
         }
-
-        _stateLock.Dispose();
     }
 }

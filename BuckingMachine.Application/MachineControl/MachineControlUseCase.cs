@@ -1,6 +1,5 @@
 namespace BuckingMachine.Application.MachineControl;
 
-using BuckingMachine.Application.DTOs;
 using BuckingMachine.Application.Interfaces;
 
 public sealed class MachineControlUseCase
@@ -15,23 +14,9 @@ public sealed class MachineControlUseCase
     public Task StartContinuousAsync(CancellationToken cancellationToken = default) =>
         _gateway.StartContinuousAsync(cancellationToken);
 
-    public Task StopAsync(CancellationToken cancellationToken = default) =>
-        _gateway.StopAsync(cancellationToken);
+    public Task StopAsync() => _gateway.StopAsync();
 
-    public Task ResetAsync(CancellationToken cancellationToken = default) =>
-        _gateway.ResetAsync(cancellationToken);
+    public Task ResetAsync() => _gateway.ResetAsync();
 
-    public async Task<MachineStatusDto> ReadStateAsync(CancellationToken cancellationToken = default)
-    {
-        MachineSimulationStatus status = await _gateway.ReadStateAsync(cancellationToken);
-
-        return new MachineStatusDto
-        {
-            MotionState = status.MotionState,
-            CompletedCycles = status.CompletedCycles,
-            CurrentParameters = status.CurrentParameters is null
-                ? null
-                : DtoMapper.Map(status.CurrentParameters)
-        };
-    }
+    public Task TriggerFaultAsync() => _gateway.TriggerFaultAsync();
 }

@@ -16,7 +16,7 @@ public sealed class RecordProcessDataUseCase
         _machineControlGateway = machineControlGateway;
     }
 
-    public Task<int> ExecuteAsync(
+    public Task ExecuteAsync(
         ParameterData currentParameterData,
         StatusData statusData,
         MachineCycle machineCycle,
@@ -34,7 +34,7 @@ public sealed class RecordProcessDataUseCase
             Duration = machineCycle.Duration
         };
 
-        return _repository.SaveCompletedCycleAsync(statusData, cycle, cancellationToken);
+        return _repository.SaveCompletedCycleAsync(cycle, statusData, cancellationToken);
     }
 
     public async Task SaveParameterDataAsync(
@@ -42,7 +42,7 @@ public sealed class RecordProcessDataUseCase
         CancellationToken cancellationToken = default)
     {
         ValidateParameters(parameterData);
-        await _machineControlGateway.UpdateParametersAsync(parameterData, cancellationToken);
+        await _machineControlGateway.UpdateParametersAsync(parameterData);
         await _repository.SaveParameterDataAsync(parameterData, cancellationToken);
     }
 

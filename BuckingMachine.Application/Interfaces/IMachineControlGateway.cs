@@ -7,8 +7,9 @@ public interface IMachineControlGateway
 {
     Task StartSingleCycleAsync(CancellationToken cancellationToken = default);
     Task StartContinuousAsync(CancellationToken cancellationToken = default);
-    Task StopAsync(CancellationToken cancellationToken = default);
-    Task ResetAsync(CancellationToken cancellationToken = default);
-    Task<MachineSimulationStatus> ReadStateAsync(CancellationToken cancellationToken = default);
-    Task UpdateParametersAsync(ParameterData parameterData, CancellationToken cancellationToken = default);
+    Task StopAsync();
+    Task ResetAsync();
+    Task TriggerFaultAsync();
+    Task UpdateParametersAsync(ParameterData parameterData);
+    Task<MachineSimulationStatus> ReadStateAsync();
 }
