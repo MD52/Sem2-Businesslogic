@@ -12,4 +12,38 @@ public sealed class BuckingMachineDbContext : DbContext
     }
 
     public DbSet<ParameterData> ParameterData => Set<ParameterData>();
+
+     protected override void OnModelCreating(
+        ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ParameterData>(entity =>
+        {
+            entity.ToTable("ParameterData");
+
+            entity.HasKey(parameter =>
+                parameter.ParameterDataId);
+
+            entity.Property(parameter =>
+                    parameter.ParameterDataId)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(parameter =>
+                    parameter.RecordedAt)
+                .IsRequired();
+
+            entity.Property(parameter =>
+                    parameter.MachineId)
+                .IsRequired();
+
+            entity.Property(parameter =>
+                    parameter.AmountCycleMovements)
+                .IsRequired();
+        });
+    }
+
+
+
+
 }
